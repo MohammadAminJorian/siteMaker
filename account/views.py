@@ -19,6 +19,8 @@ from knox.models import AuthToken
 from .serializer import *
 from .models import MyUser
 from django.db.models import Q
+from django.contrib.auth import logout
+from rest_framework.views import APIView
 from django.http import JsonResponse, HttpResponse, Http404
 
 
@@ -48,6 +50,13 @@ class LoginAPI(KnoxLoginView):
         return super(LoginAPI, self).post(request, format=None)
 
 
+
+
+class LogoutView(APIView):
+    def post(self, request):
+        logout(request)
+        return Response({'message': "Logout successful"})
+
 class ProfileView(APIView):
     def get(self, request):
         profile = Profile.objects.get(user_id=request.user.id)
@@ -74,6 +83,8 @@ class Home(APIView):
         return Response({
             None
         })
+
+
 
 
 

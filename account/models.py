@@ -1,9 +1,12 @@
 from django.db import models
+from django.db.models.signals import post_save
+from django.forms import ModelForm
+
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 
 
 class MyUserManager(BaseUserManager):
-    def create_user(self, email, username, phone, password=None):
+    def create_user(self, email, username, phone, password , is_admin):
         """
         Creates and saves a User with the given email, date of
         birth and password.
@@ -15,13 +18,14 @@ class MyUserManager(BaseUserManager):
             email=self.normalize_email(email),
             username=username,
             phone=phone,
+            is_admin=is_admin
         )
 
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, usermane, phone, password=None):
+    def create_superuser(self, email, username, phone, password , is_admin=True):
         """
         Creates and saves a superuser with the given email, date of
         birth and password.
@@ -29,8 +33,10 @@ class MyUserManager(BaseUserManager):
         user = self.create_user(
             email,
             password=password,
-            usermane=usermane,
-            phone=phone
+            username=username,
+            phone=phone,
+            is_admin=is_admin
+
         )
         user.is_administrator = True
         user.save(using=self._db)
@@ -56,7 +62,7 @@ class MyUser(AbstractBaseUser):
     REQUIRED_FIELDS = ["username","email"]
 
     def __str__(self):
-        return self.email
+        return self.phone
 
     def has_perm(self, perm, obj=None):
         "Does the user have a specific permission?"
@@ -73,3 +79,20 @@ class MyUser(AbstractBaseUser):
         "Is the user a member of staff?"
         # Simplest possible answer: All admins are staff
         return self.is_administrator
+
+class Profile(models.Model):
+    user = models.OneToOneField(MyUser, on_delete=models.CASCADE, related_name="Profile")
+    first_name = models.CharField(max_length=50, blank=True, null=False)
+    last_name = models.CharField(max_length=50, blank=True, null=False)
+    nationality_code = models.CharField(max_length=10, blank=True, null=True)
+    address = models.CharField(max_length=200, blank=True, null=False)
+    photo = models.ImageField(upload_to='profile_image/')
+
+
+def save_profile_user(sender, **kwargs):
+    if kwargs['created']:
+        profile_user = Profile(user=kwargs['instance'])
+        profile_user.save()
+
+
+post_save.connect(save_profile_user, sender=MyUser)

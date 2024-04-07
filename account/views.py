@@ -141,6 +141,7 @@ class categoryCreate(APIView):
 
 
 
+
 class postView(APIView):
     def get(self, request, id):
         data = get_object_or_404(Post, id=id, status=publish)

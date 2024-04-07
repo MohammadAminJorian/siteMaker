@@ -1,0 +1,10 @@
+{% load rest_framework %}
+{% load static %}
+
+<div class="div5">
+        <form class="form1" action="" method="POST" novalidate enctype="multipart/formdata">{% csrf_token %}
+
+            {% render_form form %}
+            <div class="formdiv14"><button type="submit" class="subbtn1">SUBMIT</button></div>
+        </form>
+    </div>

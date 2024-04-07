@@ -1,7 +1,7 @@
 from django.db import models
 from django.db.models.signals import post_save
 from django.forms import ModelForm
-
+from django.utils import timezone
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 
 
@@ -94,3 +94,34 @@ def save_profile_user(sender, **kwargs):
 
 
 post_save.connect(save_profile_user, sender=MyUser)
+
+
+
+class Category(models.Model):
+    title = models.CharField(max_length=100)
+    status = models.BooleanField(default=True)
+    position = models.IntegerField()
+
+    class Meta:
+        ordering = ['position']
+
+    def __str__(self):
+        return self.title
+
+
+class Post(models.Model):
+    STATUS_CHOICES = (
+        ('p', 'publish'),
+        ('d', 'draft')
+    )
+    admin = models.ManyToManyField(MyUser, related_name="adminUser")
+    title = models.CharField(max_length=20)
+    slug = models.CharField(max_length=20)
+    desc = models.TextField()
+    category = models.ManyToManyField(Category, related_name="post")
+    image = models.ImageField(upload_to='image_post/')
+    publish = models.DateTimeField(default=timezone.now)
+    status = models.CharField(max_length=1, choices=STATUS_CHOICES)
+
+    def __str__(self):
+        return self.title

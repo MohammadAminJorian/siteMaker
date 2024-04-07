@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'knox',
     'account',
+    'django_rest_passwordreset',
+    'rest_framework.authtoken',
 
 
 
@@ -60,7 +62,7 @@ ROOT_URLCONF = 'rest.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR, 'templates/',],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -74,7 +76,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'rest.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
@@ -132,8 +133,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        # 'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
         'knox.auth.TokenAuthentication',
     ]
 }
@@ -155,3 +156,11 @@ EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'passforgetm01@gmail.com'
 EMAIL_HOST_PASSWORD = 'zycdqopasqqtqxbz'
+
+
+
+CSRF_COOKIE_NAME = "csrftoken"
+CSRF_HEADER_NAME = 'X-CSRFTOKEN'
+CSRF_TRUSTED_ORIGIN = ['http://.127.0.0.1', 'http://.localhost']
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_SECURE= False

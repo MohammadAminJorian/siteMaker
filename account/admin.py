@@ -5,3 +5,5 @@ from .models import *
 
 admin.site.register(Profile)
 admin.site.register(MyUser)
+admin.site.register(Category)
+admin.site.register(Post)

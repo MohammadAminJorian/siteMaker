@@ -114,14 +114,36 @@ class Post(models.Model):
         ('p', 'publish'),
         ('d', 'draft')
     )
-    admin = models.ManyToManyField(MyUser, related_name="adminUser")
+    LANGUAGEOFCREATE = (
+        ('django','Django'),
+        ('djangorest','djangoRestFramework'),
+        ('html', 'html&css'),
+        ('next', 'nextJs'),
+        ('php', 'Php')
+    )
+    admin = models.ForeignKey(MyUser, related_name="adminUser" , on_delete=models.CASCADE)
     title = models.CharField(max_length=20)
     slug = models.CharField(max_length=20)
     desc = models.TextField()
-    category = models.ManyToManyField(Category, related_name="post")
+    price = models.IntegerField(null=False, blank=False)
+    time_of_create = models.CharField(max_length=40)
+    Language_of_create = models.CharField(max_length=10, choices=LANGUAGEOFCREATE)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="categoryPost")
     image = models.ImageField(upload_to='image_post/')
     publish = models.DateTimeField(default=timezone.now)
     status = models.CharField(max_length=1, choices=STATUS_CHOICES)
+    is_available = models.BooleanField(default=True)
+
 
     def __str__(self):
         return self.title
+
+
+class Cart(models.Model):
+    user = models.ForeignKey(MyUser, on_delete=models.CASCADE , related_name="UserThatBuy")
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="PostThatBuy")
+    quantity = models.PositiveIntegerField()
+    is_paid = models.BooleanField(default=False)
+
+
+

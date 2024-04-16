@@ -88,23 +88,7 @@ class Home(APIView):
 
 
 #
-# class category(APIView):
-#     # def get(self, request, format=None):
-#     #     data = Category.objects.all().values()
-#     #     return Response(data)
-#
-#     def post(self, request, *args, **kwargs):
-#         data = {
-#             'title': request.data.get('title'),
-#             'image': request.data.get('image'),
-#             'status': request.data.get('status')
-#         }
-#         serializer = Category(data=data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data, status=status.HTTP_201_CREATED)
-#         else:
-#             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST )
+
 
 
 
@@ -121,22 +105,24 @@ class categoryView(APIView):
         }, status=status.HTTP_200_OK)
 
 
-class categoryCreate(APIView):
 
-    def get(self, request, format=None):
-        category = Category.objects.all()
-        serializer = CreateCategorySerializer(category, many=True)
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def post(self, request, format=None):
-        data = request.data
-
+class categoryCreate(generics.GenericAPIView):
+    serializer_class = CreateCategorySerializer
+    def post(self, request, *args, **kwargs):
+        data = {
+            'title': request.data.get('title'),
+            'status': request.data.get('status'),
+            'position': request.data.get('position'),
+        }
+        print(data)
         serializer = CreateCategorySerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 
@@ -156,18 +142,56 @@ class postView(APIView):
             'admin': data.admin,
         }, status=status.HTTP_200_OK)
 
-class postCreate(APIView):
 
-    def get(self, request, format=None):
-        posts = Post.objects.all()
-        serializer = PostCreateSerializer(posts, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    def post(self, request, format=None):
-        data = request.data
+
+
+class postCreate(generics.GenericAPIView):
+    serializer_class = PostCreateSerializer
+
+    def post(self, request, *args, **kwargs):
+        data = {
+            'admin':request.user.id,
+            'slug': request.data.get('slug'),
+            'category': request.data.get('category'),
+            'title': request.data.get('title'),
+            'status': request.data.get('status'),
+            'desc': request.data.get('desc'),
+            'time_of_create': request.data.get('time_of_create'),
+            'price': request.data.get('price'),
+            'Language_of_create': request.data.get('Language_of_create'),
+            'image': request.data.get('image'),
+        }
+        print(data)
         serializer = PostCreateSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # https://forum.djangoproject.com/t/create-a-book-instance-with-multiple-tags-in-django-rest-framework/19284
+
+
+
+class UpdatePost(RetrieveUpdateAPIView):
+    serializer_class = PostUpdateSerializer
+    queryset = Post.objects.all()
+
+#
+# class postDelete(APIView):
+#
+#     def get(self, request, pk, format=None):
+#         posts = self.get_object(pk)
+#         serializer = (event)
+#         return Response(serializer.data)
+#
+#
+#     def delete(self, request, pk, format=None):
+#         posts = self.get_object(pk)
+#         posts.delete()
+#         return Response(status=status.HTTP_204_NO_CONTENT)
+#
+
+
+
+

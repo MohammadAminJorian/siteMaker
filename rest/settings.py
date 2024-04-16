@@ -133,7 +133,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        # 'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
         'knox.auth.TokenAuthentication',
     ]
@@ -159,8 +159,11 @@ EMAIL_HOST_PASSWORD = 'zycdqopasqqtqxbz'
 
 
 
-CSRF_COOKIE_NAME = "csrftoken"
-CSRF_HEADER_NAME = 'X-CSRFTOKEN'
-CSRF_TRUSTED_ORIGIN = ['http://.127.0.0.1', 'http://.localhost']
-CSRF_COOKIE_HTTPONLY = False
-CSRF_COOKIE_SECURE= False
+    # CSRF_COOKIE_NAME = "csrftoken"
+    # CSRF_HEADER_NAME = 'X-CSRFTOKEN'
+    # CSRF_TRUSTED_ORIGIN = ['http://.127.0.0.1', 'http://.localhost']
+    # CSRF_COOKIE_HTTPONLY = False
+    # CSRF_COOKIE_SECURE= False
+
+
+CART_SESSION_ID = 'cart'

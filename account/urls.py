@@ -19,6 +19,5 @@ urlpatterns = [
     path('api/UpdatePost/<int:pk>', UpdatePost.as_view(), name='UpdatePost'),
     path('api/categoryView/<int:id>', categoryView.as_view(), name='categoryCreate'),
     path('api/categoryCreate/', categoryCreate.as_view(), name='categoryCreate'),
-    path('api/cart', CartAPI.as_view(), name='cart'),
 
 ]

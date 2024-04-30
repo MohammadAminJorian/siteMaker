@@ -25,12 +25,26 @@ from django.http import JsonResponse, HttpResponse, Http404
 from rest_framework.renderers import TemplateHTMLRenderer
 
 
+import logging
+
+from django.urls import reverse
+
+from azbankgateways import bankfactories, models as bank_models, default_settings as settings
+
+
+from django.urls import reverse
+from azbankgateways import bankfactories, models as bank_models, default_settings as settings
+
+
+
+
 
 class RegisterAPI(generics.GenericAPIView):
 
     serializer_class = RegisterSerializer
 
     def post(self, request, *args, **kwargs ):
+        print(request.data)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
@@ -48,8 +62,9 @@ class LoginAPI(KnoxLoginView):
         serializer = AuthTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
-        login(request, user)
-        return super(LoginAPI, self).post(request, format=None)
+        x = login(request, user)
+        return HttpResponse('ok')
+        # return super(LoginAPI, self).post(request, format=None)
 
 
 
@@ -88,23 +103,7 @@ class Home(APIView):
 
 
 #
-# class category(APIView):
-#     # def get(self, request, format=None):
-#     #     data = Category.objects.all().values()
-#     #     return Response(data)
-#
-#     def post(self, request, *args, **kwargs):
-#         data = {
-#             'title': request.data.get('title'),
-#             'image': request.data.get('image'),
-#             'status': request.data.get('status')
-#         }
-#         serializer = Category(data=data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data, status=status.HTTP_201_CREATED)
-#         else:
-#             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST )
+
 
 
 
@@ -121,22 +120,25 @@ class categoryView(APIView):
         }, status=status.HTTP_200_OK)
 
 
-class categoryCreate(APIView):
 
-    def get(self, request, format=None):
-        category = Category.objects.all()
-        serializer = CreateCategorySerializer(category, many=True)
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def post(self, request, format=None):
-        data = request.data
-
+class categoryCreate(generics.GenericAPIView):
+    serializer_class = CreateCategorySerializer
+    def post(self, request, *args, **kwargs):
+        data = {
+            'title': request.data.get('title'),
+            'status': request.data.get('status'),
+            'position': request.data.get('position'),
+        }
+        print(data)
         serializer = CreateCategorySerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 
 
@@ -155,18 +157,95 @@ class postView(APIView):
             'admin': data.admin,
         }, status=status.HTTP_200_OK)
 
-class postCreate(APIView):
 
-    def get(self, request, format=None):
-        posts = Post.objects.all()
-        serializer = PostCreateSerializer(posts, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    def post(self, request, format=None):
-        data = request.data
+
+
+class postCreate(generics.GenericAPIView):
+    serializer_class = PostCreateSerializer
+
+    def post(self, request, *args, **kwargs):
+        data = {
+            'admin':request.user.id,
+            'slug': request.data.get('slug'),
+            'category': request.data.get('category'),
+            'title': request.data.get('title'),
+            'status': request.data.get('status'),
+            'desc': request.data.get('desc'),
+            'time_of_create': request.data.get('time_of_create'),
+            'price': request.data.get('price'),
+            'Language_of_create': request.data.get('Language_of_create'),
+            'image': request.data.get('image'),
+        }
         serializer = PostCreateSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# https://forum.djangoproject.com/t/create-a-book-instance-with-multiple-tags-in-django-rest-framework/19284
+
+
+
+class UpdatePost(RetrieveUpdateAPIView):
+    serializer_class = PostUpdateSerializer
+    queryset = Post.objects.all()
+
+class CartCreate(generics.GenericAPIView):
+    serializer_class = CartCreateSerializer
+    def post(self, request, *args, **kwargs):
+        data = {
+            'user':request.user.id,
+            'post': request.data.get('post'),
+            'quantity': request.data.get('quantity'),
+            'is_paid': request.data.get('is_paid'),
+
+        }
+        serializer = CartCreateSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+def go_to_gateway_view(request):
+    # خواندن مبلغ از هر جایی که مد نظر است
+    amount = 1000
+    # تنظیم شماره موبایل کاربر از هر جایی که مد نظر است
+    user_mobile_number = '+989112221234'  # اختیاری
+
+    factory = bankfactories.BankFactory()
+    bank = factory.create()  # or factory.create(bank_models.BankType.BMI) or set identifier
+    bank.set_request(request)
+    bank.set_amount(amount)
+    # یو آر ال بازگشت به نرم افزار برای ادامه فرآیند
+    bank.set_client_callback_url(reverse('callback-gateway'))
+    bank.set_mobile_number(user_mobile_number)  # اختیاری
+    bank_record = bank.ready()
+
+    # هدایت کاربر به درگاه بانک
+    return bank.redirect_gateway()
+
+
+
+
+def callback_gateway_view(request):
+    tracking_code = request.GET.get(settings.TRACKING_CODE_QUERY_PARAM, None)
+    if not tracking_code:
+        logging.debug("این لینک معتبر نیست.")
+        raise Http404
+
+    try:
+        bank_record = bank_models.Bank.objects.get(tracking_code=tracking_code)
+    except bank_models.Bank.DoesNotExist:
+        logging.debug("این لینک معتبر نیست.")
+        raise Http404
+
+    # در این قسمت باید از طریق داده هایی که در بانک رکورد وجود دارد، رکورد متناظر یا هر اقدام مقتضی دیگر را انجام دهیم
+    if bank_record.is_success:
+        # پرداخت با موفقیت انجام پذیرفته است و بانک تایید کرده است.
+        # می توانید کاربر را به صفحه نتیجه هدایت کنید یا نتیجه را نمایش دهید.
+        return HttpResponse("پرداخت با موفقیت انجام شد")
+
+    # پرداخت موفق نبوده است. اگر پول کم شده است ظرف مدت ۴۸ ساعت پول به حساب شما بازخواهد گشت.
+    return HttpResponse("پرداخت با شکست مواجه شده است. اگر پول کم شده است ظرف مدت ۴۸ ساعت پول به حساب شما بازخواهد گشت")

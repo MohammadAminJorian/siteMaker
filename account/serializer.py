@@ -49,12 +49,29 @@ class ProfileUppdateSerializer(serializers.ModelSerializer):
 class PostCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
-        fields = ['category', 'title', 'slug', 'image', 'desc', 'status']
-    def save(self, **kwargs):
-        posts = self.validated_data.pop('posts', [])
-        posts = Category.objects.create(**self.validated_data)
+        fields = ['admin', 'category', 'image', 'title', 'slug', 'desc', 'time_of_create' , 'price' , 'Language_of_create', 'status']
 
 
+class PostUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Post
+        fields = ['admin', 'category', 'image', 'title', 'slug', 'desc', 'time_of_create' , 'price' , 'Language_of_create', 'status']
+
+    def update(self, instance, validated_data):
+        post_data = validated_data.pop('postupdate', None)
+        if post_data is not None:
+            instance.postupdate.admin = post_data['admin']
+            instance.postupdate.category = post_data['category']
+            instance.postupdate.image = post_data['image']
+            instance.postupdate.title = post_data['title']
+            instance.postupdate.slug = post_data['slug']
+            instance.postupdate.desc = post_data['desc']
+            instance.postupdate.time_of_create = post_data['time_of_create']
+            instance.postupdate.price = post_data['price']
+            instance.postupdate.Language_of_create = post_data['Language_of_create']
+            instance.postupdate.status = post_data['status']
+            instance.postupdate.save()
+        return super().update(instance, validated_data)
 
 
 class CreateCategorySerializer(serializers.ModelSerializer):
@@ -62,7 +79,14 @@ class CreateCategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = ['title', 'status', 'position']
 
-    def save(self, **kwargs):
-        category = self.validated_data.pop('category', [])
-        category = Category.objects.create(**self.validated_data)
+    class Meta:
+        model = Category
+        fields = "__all__"
+
+
+
+class CartCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cart
+        fields = ['user', 'post', 'quantity', 'is_paid']
 

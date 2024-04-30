@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-s8tg@*5*+s%30$=q1)b_aj=+pk2u5!dsyl!4h5y%1#$xf_^0b)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -42,8 +42,7 @@ INSTALLED_APPS = [
     'account',
     'django_rest_passwordreset',
     'rest_framework.authtoken',
-
-
+    'azbankgateways',
 
 ]
 
@@ -133,7 +132,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        # 'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
         'knox.auth.TokenAuthentication',
     ]
@@ -159,8 +158,29 @@ EMAIL_HOST_PASSWORD = 'zycdqopasqqtqxbz'
 
 
 
-CSRF_COOKIE_NAME = "csrftoken"
-CSRF_HEADER_NAME = 'X-CSRFTOKEN'
-CSRF_TRUSTED_ORIGIN = ['http://.127.0.0.1', 'http://.localhost']
-CSRF_COOKIE_HTTPONLY = False
-CSRF_COOKIE_SECURE= False
+    # CSRF_COOKIE_NAME = "csrftoken"
+    # CSRF_HEADER_NAME = 'X-CSRFTOKEN'
+    # CSRF_TRUSTED_ORIGIN = ['http://.127.0.0.1', 'http://.localhost']
+    # CSRF_COOKIE_HTTPONLY = False
+    # CSRF_COOKIE_SECURE= False
+
+
+CART_SESSION_ID = 'cart'
+
+
+AZ_IRANIAN_BANK_GATEWAYS = {
+   'GATEWAYS': {
+       'MELLAT': {
+           'TERMINAL_CODE': '<YOUR TERMINAL CODE>',
+           'USERNAME': '<YOUR USERNAME>',
+           'PASSWORD': '<YOUR PASSWORD>',
+       },
+   },
+   'DEFAULT': 'MELLAT',
+   'CURRENCY': 'IRR', # اختیاری
+   'TRACKING_CODE_QUERY_PARAM': 'tc', # اختیاری
+   'TRACKING_CODE_LENGTH': 16, # اختیاری
+   'SETTING_VALUE_READER_CLASS': 'azbankgateways.readers.DefaultReader', # اختیاری
+   'BANK_PRIORITIES': [
+   ], # اختیاری
+}

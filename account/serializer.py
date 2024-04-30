@@ -83,3 +83,10 @@ class CreateCategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = "__all__"
 
+
+
+class CartCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cart
+        fields = ['user', 'post', 'quantity', 'is_paid']
+

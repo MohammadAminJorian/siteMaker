@@ -5,6 +5,7 @@ from knox import views as knox_views
 import requests
 
 
+
 app_name = 'account'
 urlpatterns = [
     path('api/', Home.as_view(), name='home'),
@@ -19,5 +20,6 @@ urlpatterns = [
     path('api/UpdatePost/<int:pk>', UpdatePost.as_view(), name='UpdatePost'),
     path('api/categoryView/<int:id>', categoryView.as_view(), name='categoryCreate'),
     path('api/categoryCreate/', categoryCreate.as_view(), name='categoryCreate'),
+    path('api/Cart/', CartCreate.as_view(), name='CartCreate'),
 
 ]
